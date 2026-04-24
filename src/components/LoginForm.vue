@@ -72,6 +72,16 @@
         </BaseInput>
       </div>
 
+      <div v-if="errors.general" class="alert-error">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ errors.general }}
+      </div>
+
       <button class="btn-login" :disabled="loading" @click="handleLogin">
         <span v-if="loading" class="spinner" />
         {{ loading ? 'Authenticating…' : 'Login' }}
@@ -92,6 +102,7 @@
 </template>
 
 <script setup>
+import axios from 'axios'
 import { defineEmits, ref, reactive } from 'vue'
 import BaseInput from './BaseInput.vue'
 
@@ -102,12 +113,13 @@ const authMode     = ref('isc')
 const loading      = ref(false)
 const loginSuccess = ref(false)
 
-const errors = reactive({ username: '', password: '' })
+const errors = reactive({ username: '', password: '', general: '' })
 
 function validate() {
   let valid = true
   errors.username = ''
   errors.password = ''
+  errors.general  = ''
 
   if (!username.value.trim()) {
     errors.username = 'Username is required.'
@@ -120,15 +132,42 @@ function validate() {
   return valid
 }
 
+async function callLoginApi(payload) {
+
+  await new Promise(r => setTimeout(r, 1400))
+
+  if (payload.username === 'admin' && payload.password === 'admin123') {
+    return { success: true, message: 'Authentication successful' }
+  }
+  return { success: false, message: 'Invalid username or password.' }
+}
+
 async function handleLogin() {
   if (loading.value || !validate()) return
 
-  loading.value = true
+  loading.value  = true
+  errors.general = ''
 
-  await new Promise(r => setTimeout(r, 1400))
-  loading.value = false
-  loginSuccess.value = true
-  setTimeout(() => emit('login-success'), 700)
+  try {
+    const response = await callLoginApi({
+      username: username.value.trim(),
+      password: password.value,
+      mode:     authMode.value,
+    })
+
+    console.log('API Response:', response)
+
+    if (response.success) {
+      loginSuccess.value = true
+      setTimeout(() => emit('login-success'), 700)
+    } else {
+      errors.general = response.message || 'Login failed. Please try again.'
+    }
+  } catch (err) {
+    errors.general = 'Unable to reach the server. Please try again.'
+  } finally {
+    loading.value = false
+  }
 }
 
 function resetForm() {
@@ -136,6 +175,7 @@ function resetForm() {
   password.value = ''
   errors.username = ''
   errors.password = ''
+  errors.general  = ''
   loginSuccess.value = false
 }
 </script>
@@ -199,6 +239,20 @@ function resetForm() {
 
 .tag.active  { outline: 1px solid currentColor; }
 .tag:hover   { opacity: 0.75; }
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #f85149;
+  animation: shake 0.3s ease;
+}
 
 .btn-login {
   display: flex;
