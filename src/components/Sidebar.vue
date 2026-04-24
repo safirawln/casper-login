@@ -1,13 +1,19 @@
 <template>
   <aside :class="['sidebar', { collapsed }]">
+
+    <button class="toggle-circle" @click="$emit('toggle')">
+      <Icon
+        :icon="collapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'"
+        width="16"
+      />
+    </button>
+
+
     <div class="brand">
       <div class="brand-icon">
         <Icon icon="mdi:tune-vertical" width="20" color="white" />
       </div>
       <span class="brand-name" v-show="!collapsed">Push Config</span>
-      <button class="toggle-btn" @click="$emit('toggle')" :title="collapsed ? 'Expand' : 'Collapse'">
-        <Icon :icon="collapsed ? 'mdi:chevron-right' : 'mdi:chevron-left'" width="14" />
-      </button>
     </div>
 
     <nav class="nav-body">
@@ -24,7 +30,6 @@
             <span class="nav-txt" v-show="!collapsed">{{ item.name }}</span>
             <span v-if="item.badge" class="nav-badge" v-show="!collapsed">{{ item.badge }}</span>
           </a>
-          <!-- Tooltip when collapsed -->
           <div class="tooltip" v-show="collapsed">
             {{ item.name }}
             <span v-if="item.badge" class="tooltip-badge">{{ item.badge }}</span>
@@ -53,19 +58,21 @@
         </button>
       </div>
     </div>
+
   </aside>
 </template>
 
 <script setup>
-import { ref,computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
   collapsed: Boolean,
   theme: String
 })
-const isDark = computed(() => props.theme === 'dark')
+defineEmits(['toggle', 'toggle-theme'])
 
+const isDark = computed(() => props.theme === 'dark')
 const active = ref('Sessions')
 
 const menuGroups = [
@@ -128,10 +135,34 @@ const menuGroups = [
   display: flex;
   flex-direction: column;
   z-index: 100;
-  overflow: hidden;
+  overflow: visible;
   transition: width 0.22s cubic-bezier(.4,0,.2,1);
 }
 .sidebar.collapsed { width: 56px; }
+
+.toggle-circle {
+  position: absolute;
+  top: 80px;
+  right: -14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 40%;
+  background: #fff;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: 0.2s;
+}
+.toggle-circle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  transform: scale(1.05);
+}
+
 
 .brand {
   height: 52px;
@@ -158,20 +189,8 @@ const menuGroups = [
   white-space: nowrap;
   overflow: hidden;
 }
-.toggle-btn {
-  margin-left: auto;
-  width: 22px; height: 22px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--muted);
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
-}
-.toggle-btn:hover { background: var(--accent); color: #fff; }
 
+/* Nav */
 .nav-body {
   flex: 1;
   overflow-y: auto;
@@ -231,6 +250,7 @@ const menuGroups = [
   margin-left: auto;
 }
 
+/* Tooltip */
 .tooltip {
   display: flex;
   align-items: center;
