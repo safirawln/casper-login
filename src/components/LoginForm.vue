@@ -92,9 +92,10 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { defineEmits, ref, reactive } from 'vue'
 import BaseInput from './BaseInput.vue'
 
+const emit = defineEmits(['login-success'])
 const username     = ref('')
 const password     = ref('')
 const authMode     = ref('isc')
@@ -127,6 +128,7 @@ async function handleLogin() {
   await new Promise(r => setTimeout(r, 1400))
   loading.value = false
   loginSuccess.value = true
+  setTimeout(() => emit('login-success'), 700)
 }
 
 function resetForm() {
