@@ -142,7 +142,7 @@ const menuGroups = [
 
 .toggle-circle {
   position: absolute;
-  top: 80px;
+  top: 62px;
   right: -14px;
   width: 28px;
   height: 28px;
