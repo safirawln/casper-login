@@ -4,7 +4,7 @@
     <LogoPanel />
     <div class="right-panel">
       <div class="right-inner">
-        <LoginForm />
+        <LoginForm @login-success="emit('login-success')" />
         <p class="footer">CASPER © 2024 ENTERPRISE EDITION</p>
       </div>
     </div>
@@ -12,8 +12,11 @@
 </template>
 
 <script setup>
+import { defineEmits } from 'vue'
 import LogoPanel from './LogoPanel.vue'
 import LoginForm from './LoginForm.vue'
+
+const emit = defineEmits(['login-success'])
 </script>
 
 <style scoped>
